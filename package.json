@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
   },
   "dependencies": {
     "csv-parse": "^5.5.6",
@@ -15,9 +20,12 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
     "@types/multer": "^1.4.11",
     "@types/node": "^20.14.0",
+    "jest": "^30.3.0",
     "nodemon": "^3.1.4",
+    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.2"
   }

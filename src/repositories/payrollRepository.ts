@@ -7,7 +7,7 @@ import { DB_EMPLOYEES, DB_PAYROLL_ENTRIES } from '../db/seed';
  */
 let sessionOverride: PayrollRecord[] | null = null;
 
-/** Join the two seed tables and compute derived totals. */
+// Join the two seed tables and compute derived totals.
 function buildFromSeed(): PayrollRecord[] {
   const employeeMap = new Map(DB_EMPLOYEES.map((e) => [e.employee_id, e]));
 
@@ -47,12 +47,12 @@ export function load(incoming: PayrollRecord[]): void {
   sessionOverride = incoming;
 }
 
-/** Return the active dataset: uploaded CSV data if present, otherwise seed data. */
+// Return the active dataset: uploaded CSV data if present, otherwise seed data.
 export function getAll(): PayrollRecord[] {
   return sessionOverride ?? buildFromSeed();
 }
 
-/** Always true — seed data is always available. */
+// Always true seed data is always available.
 export function isLoaded(): boolean {
   return true;
 }

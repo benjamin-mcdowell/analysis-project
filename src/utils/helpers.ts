@@ -1,3 +1,6 @@
+// Helper functions for stats calculations and formatting.
+// These could be replaced with a library like lodash or mathjs if we wanted to add more complex calculations in the future.
+
 export function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);

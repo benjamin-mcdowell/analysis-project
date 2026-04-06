@@ -7,7 +7,8 @@ const OT_MULTIPLIER = 1.5;
 const OT_MULTIPLIER_TOLERANCE = 0.1;
 const PEER_WAGE_HIGH_THRESHOLD = 0.2;
 const PEER_WAGE_LOW_THRESHOLD = 0.2;
-const DAILY_HOURS_MAX = 10;
+const DAILY_STANDARD_HOURS_MAX = 10;
+const DAILY_HOURS_MAX = 15;
 const DAILY_HOURS_MIN = 4;
 const WEEKLY_HOURS_MAX = 50;
 const WEEKLY_HOURS_MIN = 30;
@@ -84,13 +85,17 @@ function checkWageLowVsPeers(record: PayrollRecord, medianRateByPeerGroup: Map<s
   anomalies.push(anomaly);
 }
 
-// Any single day has more than 10 total (standard + overtime) hours
+// Any single day has more than 10 standard hours, or more than 15 total (standard + overtime) hours
 function checkHighDailyHours(record: PayrollRecord, anomalies: Anomaly[]): void {
   for (const day of DAYS_OF_WEEK) {
     const standardHours = record.standard_hours[day];
     const overtimeHours = record.overtime_hours[day];
     const totalHours = standardHours + overtimeHours;
-    if (totalHours > DAILY_HOURS_MAX) {
+    if (standardHours > DAILY_STANDARD_HOURS_MAX) {
+      const anomaly = buildAnomaly(record, 'high_daily_hours',
+        `${day}: ${standardHours} standard hours exceeds ${DAILY_STANDARD_HOURS_MAX}`);
+      anomalies.push(anomaly);
+    } else if (totalHours > DAILY_HOURS_MAX) {
       const anomaly = buildAnomaly(record, 'high_daily_hours',
         `${day}: ${totalHours} total hours (${standardHours} standard + ${overtimeHours} overtime) exceeds ${DAILY_HOURS_MAX}`);
       anomalies.push(anomaly);
@@ -143,7 +148,6 @@ function checkZeroHoursNonzeroPay(record: PayrollRecord, anomalies: Anomaly[]): 
     `weekly_gross $${roundToCents(record.weekly_gross)} with 0 recorded hours`);
   anomalies.push(anomaly);
 }
-
 // Sunday should be OT-only; standard hours on Sunday are unexpected
 function checkSundayStandardHours(record: PayrollRecord, anomalies: Anomaly[]): void {
   const sundayStandardHours = record.standard_hours['sun'];
@@ -155,13 +159,16 @@ function checkSundayStandardHours(record: PayrollRecord, anomalies: Anomaly[]): 
   anomalies.push(anomaly);
 }
 
-// OT hours are recorded but standard hours haven't reached 40 yet
+// OT hours are recorded on weekdays but standard hours for the full week never reached 40.
+// Weekend OT (sat/sun) is always expected and is excluded from this check.
 function checkOtBeforeStandardComplete(record: PayrollRecord, anomalies: Anomaly[]): void {
-  if (record.total_overtime_hours === 0 || record.total_standard_hours >= STANDARD_HOURS_FULL_WEEK) {
+  const weekdayOtHours = record.overtime_hours.mon + record.overtime_hours.tue + record.overtime_hours.wed
+    + record.overtime_hours.thu + record.overtime_hours.fri;
+  if (weekdayOtHours === 0 || record.total_standard_hours >= STANDARD_HOURS_FULL_WEEK) {
     return;
   }
   const anomaly = buildAnomaly(record, 'ot_before_standard_complete',
-    `${record.total_overtime_hours} OT hours recorded but standard hours are only ${record.total_standard_hours} (below ${STANDARD_HOURS_FULL_WEEK})`);
+    `${weekdayOtHours} weekday OT hours recorded but standard hours are only ${record.total_standard_hours} (below ${STANDARD_HOURS_FULL_WEEK})`);
   anomalies.push(anomaly);
 }
 
@@ -213,7 +220,10 @@ export function detectAnomalies(records: PayrollRecord[]): Anomaly[] {
     checkWeeklyHoursLow(record, anomalies);
     checkZeroHoursNonzeroPay(record, anomalies);
     checkSundayStandardHours(record, anomalies);
-    checkOtBeforeStandardComplete(record, anomalies);
+    // This is disabled because nearly every record trips it, which makes it not useful as an anomaly signal in this dataset 
+    // seems like a business rule that isn't actually followed or an assumption I made incorrectly that overtime hours only
+    // happen on weeks that have standard hours > 40. leaving the code here in case we want to re-enable or adjust it later.
+    // checkOtBeforeStandardComplete(record, anomalies);
     checkOtMissingAfterStandardComplete(record, anomalies);
   }
 

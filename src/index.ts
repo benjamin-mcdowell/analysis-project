@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import uploadRouter from './routes/upload';
 import summaryRouter from './routes/summary';
 import employeesRouter from './routes/employees';
@@ -6,6 +7,8 @@ import anomaliesRouter from './routes/anomalies';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/upload', uploadRouter);
 app.use('/api/summary', summaryRouter);

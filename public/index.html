@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payroll Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --bg:           #f5f6f8;
+      --surface:      #ffffff;
+      --surface-2:    #f0f1f4;
+      --border:       #dde0e6;
+      --border-subtle:#eaecf0;
+      --accent:       #0099a8;
+      --accent-dim:   rgba(0,153,168,0.08);
+      --accent-glow:  rgba(0,153,168,0.04);
+      --danger:       #d93025;
+      --danger-dim:   rgba(217,48,37,0.08);
+      --warning:      #b45309;
+      --warning-dim:  rgba(180,83,9,0.08);
+      --info:         #5b21b6;
+      --info-dim:     rgba(91,33,182,0.08);
+      --success:      #166534;
+      --success-dim:  rgba(22,101,52,0.08);
+      --text:         #111827;
+      --text-muted:   #6b7280;
+      --text-dim:     #c0c5ce;
+      --font-ui:      'Syne', sans-serif;
+      --font-mono:    'Space Mono', monospace;
+      --radius:       6px;
+      --radius-lg:    10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .app { max-width: 1400px; margin: 0 auto; padding: 0 28px 80px; }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 44px;
+    }
+    .header-left { display: flex; align-items: baseline; gap: 14px; }
+    .header-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .header-accent { color: var(--accent); }
+    .header-sub {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    /* ── Button ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #ffffff; }
+    .btn-primary:hover { background: #007a87; box-shadow: 0 0 18px rgba(0,153,168,0.22); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+    /* ── Status banner ── */
+    .banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .banner-success { background: var(--success-dim); border: 1px solid rgba(74,222,128,0.3); color: var(--success); }
+    .banner-error   { background: var(--danger-dim);  border: 1px solid rgba(255,107,107,0.3); color: var(--danger); }
+    .banner-x {
+      background: none; border: none; cursor: pointer;
+      color: inherit; opacity: 0.55; font-size: 15px; padding: 0 2px;
+    }
+    .banner-x:hover { opacity: 1; }
+
+    /* ── Loading / Empty ── */
+    .center-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 80px 0; gap: 18px; text-align: center;
+    }
+    .spinner {
+      width: 30px; height: 30px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-icon {
+      width: 52px; height: 52px;
+      border: 2px dashed var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-dim); font-size: 20px;
+    }
+    .state-title  { font-size: 17px; font-weight: 700; }
+    .state-sub    { font-size: 13px; color: var(--text-muted); max-width: 300px; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; }
+    .section-hd {
+      display: flex; align-items: baseline; gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+    }
+    .section-hd h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+    .count-pill {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 9px;
+    }
+
+    /* ── Stat cards ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      transition: border-color 0.15s;
+    }
+    .stat-card:hover { border-color: var(--accent); }
+    .stat-lbl {
+      font-size: 10px; font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.09em;
+      color: var(--text-muted); margin-bottom: 9px;
+    }
+    .stat-val {
+      font-size: 26px; font-weight: 800; letter-spacing: -0.02em;
+    }
+    .stat-val.mono { font-family: var(--font-mono); font-size: 21px; }
+
+    /* ── Summary bottom row ── */
+
+    /* ── Tables ── */
+    .tbl-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: var(--surface-2); }
+    th {
+      text-align: left;
+      padding: 11px 14px;
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); font-weight: 400;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--accent-glow); }
+    .td-mono { font-family: var(--font-mono); font-size: 13px; }
+    .td-muted { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
+    .td-id { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+    .td-detail { color: var(--text-muted); font-size: 13px; }
+    .td-name { font-weight: 600; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 10px; font-family: var(--font-mono);
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .bd-danger  { background: var(--danger-dim);  color: var(--danger);  border: 1px solid rgba(255,107,107,0.25); }
+    .bd-warning { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(255,200,87,0.25);  }
+    .bd-info    { background: var(--info-dim);    color: var(--info);    border: 1px solid rgba(167,139,250,0.25); }
+    .bd-default { background: var(--surface-2);   color: var(--text-muted); border: 1px solid var(--border); }
+
+    .lvl-badge { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; }
+    .lvl-journey  { background: var(--info-dim);    color: var(--info);    }
+    .lvl-apprenti { background: var(--warning-dim); color: var(--warning); }
+    .lvl-foreman  { background: var(--accent-dim);  color: var(--accent);  }
+
+    /* ── Anomaly count link ── */
+    .anomaly-count-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 20px; padding: 2px 9px;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      background: var(--danger-dim); color: var(--danger);
+      border: 1px solid rgba(255,107,107,0.25);
+      text-decoration: none;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    .anomaly-count-link:hover {
+      background: rgba(255,107,107,0.22);
+      box-shadow: 0 0 8px rgba(255,107,107,0.2);
+    }
+
+    /* ── Empty table ── */
+    .tbl-empty { padding: 40px; text-align: center; }
+    .tbl-empty-ok  { color: var(--success); font-weight: 700; font-size: 14px; }
+    .tbl-empty-sub { color: var(--text-dim); font-size: 12px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    /* ── Formatters ── */
+    const fmt$ = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtN = n => Number(n).toLocaleString('en-US');
+    const fmtPct = n => Number(n).toFixed(1) + '%';
+
+    /* ── Anomaly metadata ── */
+    const ANOMALY = {
+      rate_drift:                         { label: 'Rate Drift',         cls: 'bd-warning' },
+      ot_multiplier_wrong:                { label: 'OT Multiplier',      cls: 'bd-warning' },
+      wage_high_vs_peers:                 { label: 'Wage High',          cls: 'bd-info'    },
+      wage_low_vs_peers:                  { label: 'Wage Low',           cls: 'bd-info'    },
+      high_daily_hours:                   { label: 'High Daily Hrs',     cls: 'bd-danger'  },
+      low_daily_hours:                    { label: 'Low Daily Hrs',      cls: 'bd-danger'  },
+      weekly_hours_high:                  { label: 'Weekly Hrs High',    cls: 'bd-danger'  },
+      weekly_hours_low:                   { label: 'Weekly Hrs Low',     cls: 'bd-danger'  },
+      zero_hours_nonzero_pay:             { label: 'Zero Hrs / Pay',     cls: 'bd-danger'  },
+      sunday_standard_hours:              { label: 'Sun Std Hours',      cls: 'bd-warning' },
+      ot_before_standard_complete:        { label: 'Early OT',           cls: 'bd-info'    },
+      ot_missing_after_standard_complete: { label: 'Missing OT',         cls: 'bd-info'    },
+    };
+
+    function levelClass(level = '') {
+      const l = level.toLowerCase();
+      if (l.includes('journey'))  return 'lvl-badge lvl-journey';
+      if (l.includes('apprent'))  return 'lvl-badge lvl-apprenti';
+      if (l.includes('foreman'))  return 'lvl-badge lvl-foreman';
+      return 'lvl-badge bd-default';
+    }
+
+    /* ── Components ── */
+
+    function Header({ onUpload, uploading }) {
+      return (
+        <header className="header">
+          <div className="header-left">
+            <h1 className="header-title">Payroll<span className="header-accent">.</span>Analysis</h1>
+            <span className="header-sub">Audit Dashboard</span>
+          </div>
+          <button className="btn btn-primary" onClick={onUpload} disabled={uploading}>
+            {uploading ? '↑ Uploading…' : '↑ Upload CSV'}
+          </button>
+        </header>
+      );
+    }
+
+    function Banner({ status, onDismiss }) {
+      return (
+        <div className={`banner banner-${status.type}`}>
+          <span>{status.message}</span>
+          <button className="banner-x" onClick={onDismiss}>✕</button>
+        </div>
+      );
+    }
+
+    function StatCard({ label, value, mono }) {
+      return (
+        <div className="stat-card">
+          <div className="stat-lbl">{label}</div>
+          <div className={`stat-val${mono ? ' mono' : ''}`}>{value}</div>
+        </div>
+      );
+    }
+
+    function SummarySection({ data }) {
+      if (!data) return null;
+      return (
+        <section className="section">
+          <div className="section-hd"><h2>Summary Statistics</h2></div>
+          <div className="stat-grid">
+            <StatCard label="Employees"         value={fmtN(data.unique_employees)} />
+            <StatCard label="Total Payroll"     value={fmt$(data.total_payroll)} mono />
+            <StatCard label="Avg Standard Rate" value={fmt$(data.avg_standard_rate)} mono />
+            <StatCard label="Avg Overtime Rate" value={fmt$(data.avg_overtime_rate)} mono />
+            <StatCard label="Avg Benefits Rate" value={fmt$(data.avg_benefits_rate)} mono />
+            <StatCard label="Apprentice Hrs %"  value={fmtPct(data.apprentice_hour_pct)} mono />
+          </div>
+        </section>
+      );
+    }
+
+    function EmployeesSection({ data, anomalies }) {
+      if (!data) return null;
+      const anomalyCount = (anomalies || []).reduce((acc, a) => {
+        acc[a.employee_id] = (acc[a.employee_id] || 0) + 1;
+        return acc;
+      }, {});
+      return (
+        <section className="section">
+          <div className="section-hd">
+            <h2>Employee Statistical Overviews</h2>
+            <span className="count-pill">{data.length}</span>
+          </div>
+          <div className="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Anomalies</th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Level</th>
+                  <th>Occupation</th>
+                  <th>Weeks</th>
+                  <th>Total Gross</th>
+                  <th>Std Rate avg</th>
+                  <th>OT Rate avg</th>
+                  <th>Benefits avg</th>
+                  <th>Std Hrs/Day avg</th>
+                  <th>OT Hrs/Day avg</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map(emp => (
+                  <tr key={emp.employee_id}>
+                    <td>{anomalyCount[emp.employee_id]
+                      ? <a href={`#anomaly-emp-${emp.employee_id}`} className="anomaly-count-link"><span style={{width:6,height:6,borderRadius:'50%',background:'var(--danger)',display:'inline-block',flexShrink:0}}></span>{anomalyCount[emp.employee_id]}</a>
+                      : <span style={{color:'var(--text-dim)',fontFamily:'var(--font-mono)',fontSize:12}}>—</span>}
+                    </td>
+                    <td className="td-id">#{emp.employee_id}</td>
+                    <td className="td-name">{emp.employee_name}</td>
+                    <td><span className={levelClass(emp.level)}>{emp.level}</span></td>
+                    <td className="td-muted">{emp.occupation}</td>
+                    <td className="td-mono">{emp.weeks_worked}</td>
+                    <td className="td-mono">{fmt$(emp.total_gross_pay)}</td>
+                    <td className="td-mono">{fmt$(emp.standard_rate.avg)}</td>
+                    <td className="td-mono">{fmt$(emp.overtime_rate.avg)}</td>
+                    <td className="td-mono">{fmt$(emp.benefits_rate.avg)}</td>
+                    <td className="td-mono">{emp.daily_standard_hours.avg}</td>
+                    <td className="td-mono">{emp.daily_overtime_hours.avg}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      );
+    }
+
+    function AnomaliesSection({ data }) {
+      if (!data) return null;
+      return (
+        <section className="section">
+          <div className="section-hd">
+            <h2>Anomaly Detection</h2>
+            <span className="count-pill">{data.length} flagged</span>
+          </div>
+          <div className="tbl-wrap">
+            {data.length === 0 ? (
+              <div className="tbl-empty">
+                <p className="tbl-empty-ok">✓ No anomalies detected</p>
+                <p className="tbl-empty-sub">All payroll records passed validation checks.</p>
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>ID</th>
+                    <th>Week Ending</th>
+                    <th>Type</th>
+                    <th>Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...data].sort((a, b) => a.employee_name.localeCompare(b.employee_name) || a.employee_id - b.employee_id).map((a, i, sorted) => {
+                    const meta = ANOMALY[a.anomaly_type] || { label: a.anomaly_type, cls: 'bd-default' };
+                    const isFirstForEmployee = i === 0 || sorted[i - 1].employee_id !== a.employee_id;
+                    return (
+                      <tr key={i} id={isFirstForEmployee ? `anomaly-emp-${a.employee_id}` : undefined}>
+                        <td className="td-name">{a.employee_name}</td>
+                        <td className="td-id">#{a.employee_id}</td>
+                        <td className="td-mono">{a.week_ending}</td>
+                        <td><span className={`badge ${meta.cls}`}>{meta.label}</span></td>
+                        <td className="td-detail">{a.detail}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    /* ── App ── */
+
+    function App() {
+      const [summary,   setSummary]   = useState(null);
+      const [employees, setEmployees] = useState(null);
+      const [anomalies, setAnomalies] = useState(null);
+      const [loading,   setLoading]   = useState(true);
+      const [uploading, setUploading] = useState(false);
+      const [status,    setStatus]    = useState(null);
+      const [noData,    setNoData]    = useState(false);
+      const fileRef = useRef();
+
+      const fetchAll = useCallback(async () => {
+        setLoading(true);
+        try {
+          const [sRes, eRes, aRes] = await Promise.all([
+            fetch('/api/summary'),
+            fetch('/api/employees'),
+            fetch('/api/anomalies'),
+          ]);
+          if (sRes.status === 503) {
+            setNoData(true);
+            setSummary(null); setEmployees(null); setAnomalies(null);
+          } else {
+            setNoData(false);
+            setSummary(await sRes.json());
+            setEmployees(await eRes.json());
+            setAnomalies(await aRes.json());
+          }
+        } catch {
+          setStatus({ type: 'error', message: 'Failed to connect to API. Is the server running?' });
+        } finally {
+          setLoading(false);
+        }
+      }, []);
+
+      useEffect(() => { fetchAll(); }, [fetchAll]);
+
+      const handleUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        setStatus(null);
+        const form = new FormData();
+        form.append('file', file);
+        try {
+          const res  = await fetch('/api/upload', { method: 'POST', body: form });
+          const body = await res.json();
+          if (!res.ok) {
+            setStatus({ type: 'error', message: body.error });
+          } else {
+            setStatus({ type: 'success', message: `Loaded ${body.loaded} payroll records.` });
+            await fetchAll();
+          }
+        } catch {
+          setStatus({ type: 'error', message: 'Upload failed. Check your connection.' });
+        } finally {
+          setUploading(false);
+          e.target.value = '';
+        }
+      };
+
+      return (
+        <div className="app">
+          <Header onUpload={() => fileRef.current.click()} uploading={uploading} />
+          <input ref={fileRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleUpload} />
+          {status && <Banner status={status} onDismiss={() => setStatus(null)} />}
+          <main>
+            {loading ? (
+              <div className="center-state">
+                <div className="spinner" />
+                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading payroll data…</span>
+              </div>
+            ) : noData ? (
+              <div className="center-state">
+                <div className="state-icon">⬡</div>
+                <p className="state-title">No data loaded</p>
+                <p className="state-sub">Upload a payroll CSV to begin analysis.</p>
+                <button className="btn btn-primary" onClick={() => fileRef.current.click()}>↑ Upload CSV</button>
+              </div>
+            ) : (
+              <>
+                <SummarySection   data={summary} />
+                <EmployeesSection data={employees} anomalies={anomalies} />
+                <AnomaliesSection data={anomalies} />
+              </>
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
