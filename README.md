@@ -2,7 +2,6 @@
 Parse a CSV & provide dashboard information regarding employees, payroll, and possible anomalys.
 
 ### Running the project
-
 **Prerequisites:** Node.js 18+
 
 ```bash
@@ -19,7 +18,6 @@ The dashboard loads automatically using the data from the simulated database.
 
 To load different data at any time, click **↑ Upload CSV** the new file replaces the current dataset in memory.
 
-
 ### Future improvements
 - More advanced Frontend,  I built a single static react page, that just loads the data from memory using default formatting.  Given more time I'd replace this with an actual react project that doesn't lump together data loading, css styling, and behavior all in one blob.
 
@@ -35,9 +33,7 @@ To load different data at any time, click **↑ Upload CSV** the new file replac
 
 - Types all exist in one file for simplicity but I'd probably make a seperate package of individual dto models that could be used by different solutions so the models would be transportable and imported as an NPM package.
 
-• Write tests– unit tests, integration tests, or end-to-end tests
-
-### Anomaly detection 
+### Anomaly detection rules 
 - Wages higher than 20% more than someone at the same occupation and level
 - Wages lower than 20% less than someone at the same occupation and level
 - Higher hours than 10 in a day
