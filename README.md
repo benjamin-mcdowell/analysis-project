@@ -27,7 +27,7 @@ To load different data at any time, click **↑ Upload CSV** the new file replac
 
 - Lint or code quality enforcement, If this project were persisting I'd definitely do this just to keep the codebase clean and give AI tooling something to follow.
 
-- More testing, right now I only unit test the anomaly analysis code, but we could add testing all over the place.  I think further unit tests, and end to end tests of uploading a file, and verifying values would be good.
+- More testing, right now I only unit test the anomaly analysis code to show how to approach that, but we could add testing all over the place.  I think further unit tests, and end to end tests of uploading a file, and verifying values would be good.
 
 - CSV Parser is fragile,  I didn't really spend much time making sure if fields were missing it would error or request the proper format from a user. I just assumed the file would be in the correct format which is a BIG assumption.
 
@@ -40,7 +40,7 @@ To load different data at any time, click **↑ Upload CSV** the new file replac
 - Lower hours than 4 in a day
 - More than 50 hours in a week
 - Less than 30 hours in a week
-- Overtime is being performed before standard hours are 40
+- Overtime is being performed before standard hours are 40 - Currently disabled, see questions below
 - Overtime is not being performed after standard hours are 40
 - Regular hours are not worked on sunday only overtime
 
@@ -51,4 +51,4 @@ To load different data at any time, click **↑ Upload CSV** the new file replac
 
 - Do things vary in real word cases,  like does overtime sometimes not kick in until 45?  or do weekeneds always count as overtime? what other
 
-- What are the rules regarding overtime? I assumed that any hours over 40 is overtime, but that creates a ton of anomalies so I disabled this rule until we confirm it.
+- What are the rules regarding overtime? I assumed that any hours over 40 is overtime, but that creates a ton of anomalies so I disabled this rule until we confirm it seems like a business rule that isn't actually followed or an assumption I made incorrectly that overtime hours only happen on weeks that have standard hours > 40. leaving the code here in case we want to re-enable or adjust it later.

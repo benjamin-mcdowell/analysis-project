@@ -220,9 +220,6 @@ export function detectAnomalies(records: PayrollRecord[]): Anomaly[] {
     checkWeeklyHoursLow(record, anomalies);
     checkZeroHoursNonzeroPay(record, anomalies);
     checkSundayStandardHours(record, anomalies);
-    // This is disabled because nearly every record trips it, which makes it not useful as an anomaly signal in this dataset 
-    // seems like a business rule that isn't actually followed or an assumption I made incorrectly that overtime hours only
-    // happen on weeks that have standard hours > 40. leaving the code here in case we want to re-enable or adjust it later.
     // checkOtBeforeStandardComplete(record, anomalies);
     checkOtMissingAfterStandardComplete(record, anomalies);
   }
