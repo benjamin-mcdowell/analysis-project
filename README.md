@@ -1,5 +1,5 @@
 # Analysis Project
-Parse a CSV & provide dashboard information regarding employees, payroll, and possible anomalys.
+Provide dashboard information regarding employees, payroll, and possible anomalies.
 
 ### Running the project
 **Prerequisites:** Node.js 18+
@@ -10,15 +10,14 @@ npm install
 
 # Start the development server
 npm run dev
-```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+```
 
 The dashboard loads automatically using the data from the simulated database.
-
 To load different data at any time, click **↑ Upload CSV** the new file replaces the current dataset in memory.
 
-### Future improvements
+### Future improvements & Review Notes
 - More advanced Frontend,  I built a single static react page, that just loads the data from memory using default formatting.  Given more time I'd replace this with an actual react project that doesn't lump together data loading, css styling, and behavior all in one blob.
 
 - Full DB Implementation,  I just made a repository that simulates loading data from the DB.  It could easily be hooked up with Postgres, SQLServer, Supabase or whatever.  I just did that to provide the layer and how I would approach it, but not get bogged down in DB implementation details.
@@ -31,7 +30,9 @@ To load different data at any time, click **↑ Upload CSV** the new file replac
 
 - CSV Parser is fragile,  I didn't really spend much time making sure if fields were missing it would error or request the proper format from a user. I just assumed the file would be in the correct format which is a BIG assumption.
 
-- Types all exist in one file for simplicity but I'd probably make a seperate package of individual dto models that could be used by different solutions so the models would be transportable and imported as an NPM package.
+- DTO Types all exist in one file for simplicity but I'd probably make a seperate package of individual dto models that could be used by different solutions but because the frontend is static we got away with a shared types file.
+
+- .env handling, I didn't need any secrets or addresses for the project being this size, but for a production app we'd definitely want to have standard environment variables and load them at runtime.  
 
 ### Anomaly detection rules 
 - Wages higher than 20% more than someone at the same occupation and level
