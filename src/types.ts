@@ -1,35 +1,39 @@
-export interface PayrollRecord {
-  employee_name: string;
+export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+export const DAYS_OF_WEEK: readonly DayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+export type EmployeeLevel = 'APPRENTICE' | 'JOURNEYWORKER';
+
+export interface DailyHoursDto {
+  mon: number;
+  tue: number;
+  wed: number;
+  thu: number;
+  fri: number;
+  sat: number;
+  sun: number;
+}
+
+export interface EmployeeDto {
   employee_id: number;
-  level: 'APPRENTICE' | 'JOURNEYWORKER';
+  employee_name: string;
+  level: EmployeeLevel;
   occupation: string;
+}
+
+export interface PayrollEntryDto {
+  employee_id: number;
   week_ending: string;
-
-  // Standard hours per day
-  mon_st_hours: number;
-  tue_st_hours: number;
-  wed_st_hours: number;
-  thu_st_hours: number;
-  fri_st_hours: number;
-  sat_st_hours: number;
-  sun_st_hours: number;
-
-  // Overtime hours per day
-  mon_ot_hours: number;
-  tue_ot_hours: number;
-  wed_ot_hours: number;
-  thu_ot_hours: number;
-  fri_ot_hours: number;
-  sat_ot_hours: number;
-  sun_ot_hours: number;
-
+  standard_hours: DailyHoursDto;
+  overtime_hours: DailyHoursDto;
   standard_rate: number;
   overtime_rate: number;
   benefits_rate: number;
+}
 
-  // Derived fields (computed on parse)
-  total_st_hours: number;
-  total_ot_hours: number;
+// Joined view: employee + payroll entry + computed totals — used by API routes
+export interface PayrollRecord extends EmployeeDto, PayrollEntryDto {
+  total_standard_hours: number;
+  total_overtime_hours: number;
   weekly_gross: number;
 }
 

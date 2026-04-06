@@ -1,19 +1,29 @@
 # Analysis Project
 Parse a CSV & provide dashboard information regarding employees, payroll, and possible anomalys.
 
-### Stuff I didn't do yet ??
-• Deploy it somewhere accessible (Vercel, Netlify, a VPS, etc.)
+### Running the project
+
+
+### Future improvements
+- Full DB Implementation,  I just made a repository that simulates loading data from the DB.  It could easily be hooked up with Postgres, SQLServer, Supabase or whatever.  I just did that to provide the layer and how I would approach it, but not get bogged down in DB implementation details.
+
+- CSV Upload persistence, In my implementation you can upload a csv to view more current data, but that isn't stored or persisted into the DB.  The DTO models for this exist, and could just be fed into the DB.
+
+- Lint or code quality enforcement, If this project were persisting I'd definitely do this just to keep the codebase clean and give AI tooling something to follow.
+
+- CSV Parser is fragile,  I didn't really spend much time making sure if fields were missing it would error or request the proper format from a user. I just assumed the file would be in the correct format which is a BIG assumption.
+
+- Types all exist in one file for simplicity but I'd probably make a seperate package of individual dto models that could be used by different solutions so the models would be transportable and imported as an NPM package.
+
+
+
 • In-depth employee analysis– drill-down views, trend charts, week-
 over-week comparisons
 • Make it beautiful– thoughtful UI/UX, responsive layout, charts and
 visualizations
-• Design a database schema and implement a simple backend to
-store/query the data
-• Build a file upload feature so new CSVs can be loaded into the dash-
-board
 • Write tests– unit tests, integration tests, or end-to-end tests
 
-### Anomaly detection ??
+### Anomaly detection 
 - Wages higher than 20% more than someone at the same occupation and level
 - Wages lower than 20% less than someone at the same occupation and level
 - Higher hours than 10 in a day

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-import { parse } from '../parsers/csvParser';
+import { parsePayrollCsv } from '../parsers/csvParser';
 import * as repo from '../repositories/payrollRepository';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -17,7 +17,7 @@ router.post('/', upload.single('file'), (req: Request, res: Response) => {
   }
 
   try {
-    const records = parse(req.file.buffer);
+    const records = parsePayrollCsv(req.file.buffer);
     repo.load(records);
     res.json({ loaded: records.length });
   } catch (err) {
